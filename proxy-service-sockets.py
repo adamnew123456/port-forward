@@ -5,6 +5,7 @@ The service accepts connections through a Unix domain sockets.
 """
 
 import os
+import socket
 import socketproto
 import portforward
 
@@ -14,32 +15,31 @@ server.listen(1)
 
 try:
     while True:
-        client, _ = test_socket_recv.accept()
+        client, _ = server.accept()
 
         # Go ahead and assume a command, since the client
         # will never send a lone True/False
         msgtype, params = socketproto.read_message(client)
 
         if msgtype == socketproto.Messages.AddProxy:
-            print "+ {}:{} -> {}:{}".format(
-                    src[0], src[1],
-                    dest[0], dest[1])
-
             src, dest = params
             try:
                 portforward.add_mapping(src, dest)
                 socketproto.write_message(client, True)
+                print "Done"
             except:
                 socketproto.write_message(client, False)
+                print "Fail"
 
         elif msgtype == socketproto.Messages.DelProxy:
-            print "- {}:{}".format(src[0], src[1])
             src = params
             try:
                 portforward.del_mapping(src)
                 socketproto.write_message(client, True)
+                print "Done"
             except:
                 socketproto.write_message(client, False)
+                print "Fail"
 
         elif msgtype == socketproto.Messages.GetProxies:
             src_to_dest = []
