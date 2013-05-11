@@ -2,9 +2,11 @@
 """Usage: port-tool <add|del|list|help> ...
 
 Note that all <src> and <dest> are in terms of a portspec, which looks like:
-  <host>:<port>
+  <proto>:<host>:<port>
 Example:
-  www.google.com:80
+    TCP:www.google.com:80
+or
+    UDP:www.streaming.example.com:9100
 
 add <src> <dest>: Adds a mapping between the source and destionation given.
 del <src>: Removes the mapping which is associated with the source given.
@@ -17,8 +19,11 @@ import socketproto
 import sys
 
 def portspec(arg):
-    host, port = arg.split(":")
-    return (host, int(port))
+    proto, host, port = arg.split(":")
+    return (host, int(port), {
+            'TCP': socket.SOCK_STREAM,
+            'UDP': socket.SOCK_DGRAM,
+    }[proto])
 
 try:
     if sys.argv[1] not in ('add', 'del', 'list'):
@@ -55,5 +60,10 @@ elif sys.argv[1] == 'list':
     if msg != socketproto.Messages.GetProxies:
         print '[Protocol error]'
 
-    for ((srchost, srcport), (desthost, destport)) in proxies:
-        print '{}:{} -> {}:{}'.format(srchost, srcport, desthost, destport)
+    tostring = {
+        socket.SOCK_STREAM: 'TCP',
+        socket.SOCK_DGRAM: 'UDP',
+    }
+
+    for ((srchost, srcport, srcproto), (desthost, destport, destproto)) in proxies:
+        print '{}:{} ({}) -> {}:{} ({})'.format(srchost, srcport, tostring[srcproto], desthost, destport, tostring[destproto])

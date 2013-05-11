@@ -4,6 +4,10 @@ The service component for the port redirector.
 The service accepts connections through a Unix domain sockets.
 """
 
+import logging
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger('[' + __name__ + ']')
+
 import os
 import socket
 import socketproto
@@ -26,28 +30,30 @@ try:
             try:
                 portforward.add_mapping(src, dest)
                 socketproto.write_message(client, True)
-                print "Done"
-            except:
+                logger.debug("Done")
+            except socket.error as e:
                 socketproto.write_message(client, False)
-                print "Fail"
+                logger.debug("Fail\n\t-%s", e)
 
         elif msgtype == socketproto.Messages.DelProxy:
             src = params
             try:
                 portforward.del_mapping(src)
                 socketproto.write_message(client, True)
-                print "Done"
-            except:
+                logger.debug("Done")
+            except KeyError:
                 socketproto.write_message(client, False)
-                print "Fail"
+                logger.debug("Fail")
 
         elif msgtype == socketproto.Messages.GetProxies:
             src_to_dest = []
-            for src in portforward.src_to_svr:
-                svr = portforward.src_to_svr[src]
-                dest = portforward.svr_to_dest[svr.fileno()]
-                src_to_dest.append(((src[0], src[1]), (dest[1], dest[2])))
-            socketproto.write_message(client, (socketproto.Messages.GetProxies, src_to_dest))
+            for svr in portforward.src_to_svr.itervalues():
+                src = svr._src
+                dest = svr._dest
+                src_to_dest.append((src, dest))
+
+            socketproto.write_message(client, 
+                    (socketproto.Messages.GetProxies, src_to_dest))
 
         client.close()
         
