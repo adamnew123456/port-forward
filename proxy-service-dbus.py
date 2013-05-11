@@ -66,10 +66,12 @@ class PortRedirector(dbus.service.Object):
                          out_signature='a(sissis)')
     def ReadMappings(self):
         src_to_dest = []
-        for src in portforward.src_to_svr:
-            svr = portforward.src_to_svr[src]
-            dest = portforward.svr_to_dest[svr.fileno()]
-            src_to_dest.append((src[0], src[1], portforward.Protocol.ToString[src[2]], dest[1], dest[2], portforward.Protocol.ToString[dest[3][1]]))
+        for svr in portforward.src_to_svr.itervalues():
+            src = svr._src
+            dest = svr._dest
+            src_to_dest.append(
+                    (src[0], src[1], portforward.Protocol.ToString[src[2]],
+                     dest[0], dest[1], portforward.Protocol.ToString[dest[2]]))
         return src_to_dest
 
 DBusGMainLoop(set_as_default=True)
