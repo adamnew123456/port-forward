@@ -18,8 +18,10 @@ try:
     assert_eq(msgtype, socketproto.Messages.AddProxy)
     assert_eq(params[0][0], '')
     assert_eq(params[0][1], 8000)
+    assert_eq(params[0][2], socket.SOCK_DGRAM)
     assert_eq(params[1][0], 'www.google.com')
     assert_eq(params[1][1], 80)
+    assert_eq(params[1][2], socket.SOCK_STREAM)
 
     socketproto.write_message(client, True)
     print "[AddProxy] Success"
@@ -29,6 +31,7 @@ try:
     assert_eq(msgtype, socketproto.Messages.DelProxy)
     assert_eq(params[0], '')
     assert_eq(params[1], 8000)
+    assert_eq(params[2], socket.SOCK_DGRAM)
 
     socketproto.write_message(client, False)
     print "[DelProxy] Success"
@@ -38,7 +41,7 @@ try:
     assert_eq(msgtype, socketproto.Messages.GetProxies)
     assert_eq(params, [])
 
-    socketproto.write_message(client, (socketproto.Messages.GetProxies, [(('', 8000), ('www.google.com', 80))]))
+    socketproto.write_message(client, (socketproto.Messages.GetProxies, [(('', 8000, socket.SOCK_DGRAM), ('www.google.com', 80, socket.SOCK_STREAM))]))
     print "[GetProxies] Success"
 finally:
     client.close()

@@ -10,13 +10,13 @@ test_socket_send = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
 test_socket_send.connect('/tmp/proxy-sockets-test')
 
 try:
-    socketproto.write_message(test_socket_send, (socketproto.Messages.AddProxy, (('', 8000), ('www.google.com', 80))))
+    socketproto.write_message(test_socket_send, (socketproto.Messages.AddProxy, (('', 8000, socket.SOCK_DGRAM), ('www.google.com', 80, socket.SOCK_STREAM))))
     msg = socketproto.read_message(test_socket_send)
     assert type(msg) is bool
     assert_eq(msg, True)
     print "[AddProxy] Success"
 
-    socketproto.write_message(test_socket_send, (socketproto.Messages.DelProxy, ('', 8000)))
+    socketproto.write_message(test_socket_send, (socketproto.Messages.DelProxy, ('', 8000, socket.SOCK_DGRAM)))
     msg = socketproto.read_message(test_socket_send)
     assert type(msg) is bool
     assert_eq(msg,  False)
@@ -25,7 +25,7 @@ try:
     socketproto.write_message(test_socket_send, (socketproto.Messages.GetProxies, []))
     msgtype, param = socketproto.read_message(test_socket_send)
     assert_eq(msgtype, socketproto.Messages.GetProxies)
-    assert_eq(param, [(('', 8000), ('www.google.com', 80))])
+    assert_eq(param, [(('', 8000, socket.SOCK_DGRAM), ('www.google.com', 80, socket.SOCK_STREAM))])
     print "[GetProxies] Success"
 finally:
     test_socket_send.close()
