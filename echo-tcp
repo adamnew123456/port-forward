@@ -1,0 +1,6 @@
+#!/bin/bash
+#
+# Wrapper around ncat to do a TCP echo server to test with.
+X=$(( $RANDOM + 1024 ))
+echo ">>> $X <<<"
+ncat -e /bin/cat -k -l $X

@@ -1,0 +1,6 @@
+#!/bin/bash
+#
+# Wrapper around ncat to do a UDP echo server to test with.
+X=$(($RANDOM + 1024))
+echo ">>> $X <<<"
+ncat -e /bin/cat -k -u -l $X
