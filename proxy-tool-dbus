@@ -2,11 +2,12 @@
 """Usage: port-tool <add|del|list|help> ...
 
 Note that all <src> and <dest> are in terms of a portspec, which looks like:
-  <host>:<port>
+  <proto>:<host>:<port>
 Example:
-  www.google.com:80
+    TCP:www.google.com:80 or
+    UDP:www.streamcast.example.com:1776
 
-add <src> <dest>: Adds a mapping between the source and destionation given.
+add <src> <dest>: Adds a mapping between the source and destionation given
 del <src>: Removes the mapping which is associated with the source given.
 list: Gets all of the mappings on the system.
 help: Prints this screen
@@ -16,9 +17,8 @@ import dbus
 import sys
 
 def portspec(arg):
-    host, port = arg.split(":")
-    return (host, int(port))
-
+    proto, host, port = arg.split(":")
+    return (host, int(port), proto)
 
 try:
     if sys.argv[1] not in ('add', 'del', 'list'):
@@ -50,5 +50,5 @@ elif sys.argv[1] == 'del':
         print '[Unable to unmap port - does it have a proxy?]'
         sys.exit(1)
 elif sys.argv[1] == 'list':
-    for (srchost, srcport, desthost, destport) in proxy.ReadMappings():
-        print '{}:{} -> {}:{}'.format(srchost, srcport, desthost, destport)
+    for (srchost, srcport, srcproto, desthost, destport, destproto) in proxy.ReadMappings():
+        print '{}:{} ({}) -> {}:{} ({})'.format(srchost, srcport, srcproto, desthost, destport, destproto)
