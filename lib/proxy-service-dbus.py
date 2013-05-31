@@ -72,9 +72,13 @@ class PortRedirector(dbus.service.Object):
                      dest[0], dest[1], portforward.Protocol.ToString[dest[2]]))
         return src_to_dest
 
+    @dbus.service.method('org.new123456.Proxy', in_signature='', out_signature='')
+    def Quit(self):
+        Gtk.main_quit()
+
 DBusGMainLoop(set_as_default=True)
 p = PortRedirector()
 try:
     Gtk.main()
-except KeyboardInterrupt:
+finally:
     portforward.quit()

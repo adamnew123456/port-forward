@@ -4,7 +4,7 @@ class Messages:
     """
     All messages that can be sent down the socket.
     """
-    AddProxy, DelProxy, GetProxies, Success, Failure = list(range(2, 7))
+    AddProxy, DelProxy, GetProxies, Quit, Success, Failure = list(range(2, 8))
 
 def read_host_port_proto(socket):
     """
@@ -39,6 +39,8 @@ def read_message(socket):
             dest = read_host_port_proto(socket)
             proxies.append((src, dest))
         return (Messages.GetProxies, proxies)
+    elif msg_type == Messages.Quit:
+        return (Messages.Quit, [])
     elif msg_type in (1, 0):
         return bool(msg_type)
     else:
@@ -75,5 +77,7 @@ def write_message(socket, msg):
         for param in params:
             write_host_port_proto(socket, param[0][0], param[0][1], param[0][2])
             write_host_port_proto(socket, param[1][0], param[1][1], param[1][2])
+    elif msgtype == Messages.Quit:
+        pass
     else:
         raise ValueError("{} is not a valid message!".format(msg_type))

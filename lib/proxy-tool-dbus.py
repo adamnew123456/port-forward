@@ -1,5 +1,5 @@
 #!/usr/bin/python2
-"""Usage: port-tool <add|del|list|help> ...
+"""Usage: port-tool <add|del|list|quit|help> ...
 
 Note that all <src> and <dest> are in terms of a portspec, which looks like:
   <proto>:<host>:<port>
@@ -10,6 +10,7 @@ Example:
 add <src> <dest>: Adds a mapping between the source and destionation given
 del <src>: Removes the mapping which is associated with the source given.
 list: Gets all of the mappings on the system.
+quit: Terminates the proxy server.
 help: Prints this screen
 """
 
@@ -21,7 +22,7 @@ def portspec(arg):
     return (host, int(port), proto)
 
 try:
-    if sys.argv[1] not in ('add', 'del', 'list'):
+    if sys.argv[1] not in ('add', 'del', 'list', 'quit'):
         print(__doc__)
         sys.exit(1)
 
@@ -52,3 +53,5 @@ elif sys.argv[1] == 'del':
 elif sys.argv[1] == 'list':
     for (srchost, srcport, srcproto, desthost, destport, destproto) in proxy.ReadMappings():
         print('{}:{} ({}) -> {}:{} ({})'.format(srchost, srcport, srcproto, desthost, destport, destproto))
+elif sys.argv[1] == 'quit':
+    proxy.Quit()

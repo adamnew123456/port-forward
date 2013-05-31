@@ -11,10 +11,16 @@ logger = logging.getLogger('[' + __name__ + ']')
 import os
 import socket
 import socketproto
+import sys
 import portforward
 
 server = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-server.bind('/tmp/.proxy-socket')
+
+try:
+    server.bind('/tmp/.proxy-socket')
+except OSError:
+    logger.error("Could not bind to proxy socket - is another instance running?")
+    sys.exit(1)
 server.listen(1)
 
 try:
@@ -54,10 +60,12 @@ try:
 
             socketproto.write_message(client, 
                     (socketproto.Messages.GetProxies, src_to_dest))
+        elif msgtype == socketproto.Messages.Quit:
+            break
 
         client.close()
         
-except KeyboardInterrupt:
+finally:
     server.close()
     os.remove('/tmp/.proxy-socket')
     portforward.quit()
