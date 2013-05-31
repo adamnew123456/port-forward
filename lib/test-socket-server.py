@@ -3,7 +3,7 @@ import socket
 import socketproto
 
 def assert_eq(a, b):
-    print repr(a), "==", repr(b), "..."
+    print(repr(a), "==", repr(b), "...")
     assert a == b
 
 test_socket_recv = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
@@ -24,7 +24,7 @@ try:
     assert_eq(params[1][2], socket.SOCK_STREAM)
 
     socketproto.write_message(client, True)
-    print "[AddProxy] Success"
+    print("[AddProxy] Success")
 
     # The second message removes the bind at :8000. Fail at this.
     msgtype, params = socketproto.read_message(client)
@@ -34,7 +34,7 @@ try:
     assert_eq(params[2], socket.SOCK_DGRAM)
 
     socketproto.write_message(client, False)
-    print "[DelProxy] Success"
+    print("[DelProxy] Success")
 
     # The third message lists the proxies (say that there is only one)
     msgtype, params = socketproto.read_message(client)
@@ -42,7 +42,7 @@ try:
     assert_eq(params, [])
 
     socketproto.write_message(client, (socketproto.Messages.GetProxies, [(('', 8000, socket.SOCK_DGRAM), ('www.google.com', 80, socket.SOCK_STREAM))]))
-    print "[GetProxies] Success"
+    print("[GetProxies] Success")
 finally:
     client.close()
     test_socket_recv.close()

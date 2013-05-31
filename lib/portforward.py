@@ -19,11 +19,12 @@ class Protocol:
 
 class Address:
     "Constants to address information in portspec tuples"
-    (HOST, PORT, PROTOCOL) = range(3)
+    (HOST, PORT, PROTOCOL) = list(range(3))
     HOST_AND_PORT = -1
 
-def format_address((host, port, proto)):
+def format_address(portspec):
     "Formats a portspec address into a string"
+    (host, port, proto) = portspec
     return "{}:{} ({})".format(host, port, Protocol.ToString[proto])
 
 def make_server(proto, src, dest):
@@ -210,11 +211,13 @@ def do_send(reader, writer):
             logger.debug("Closing Reader %i", reader_fd)
             reader.close()
 
-def add_mapping((src_host, src_port, src_proto), (dest_host, dest_port, dest_proto)):
+def add_mapping(src_portspec, dest_portspec):
     """
     Adds a mapping from a source host and port to a destination host
     and port.
     """
+    (src_host, src_port, src_proto) = src_portspec
+    (dest_host, dest_port, dest_proto) = dest_portspec
     logger.debug("Added %s:%i (%s) -> %s:%i (%s) ...",
         src_host, src_port, Protocol.ToString[src_proto],
         dest_host, dest_port, Protocol.ToString[dest_proto])
@@ -223,13 +226,14 @@ def add_mapping((src_host, src_port, src_proto), (dest_host, dest_port, dest_pro
         server = make_server(src_proto, (src_host, src_port, src_proto), (dest_host, dest_port, dest_proto))
         server.setup()
 
-def del_mapping((src_host, src_port, src_proto)):
+def del_mapping(src_portspec):
     """
     Removes a mapping currently on a source host and port.
 
     Note that this prevents incoming connections, but all existing connections
     are kept alive. This means that there is effectively no way to remove a UDP socket.
     """
+    (src_host, src_port, src_proto) = src_portspec
     logger.debug("Removed %s:%i (%s) ...", src_host, src_port, Protocol.ToString[src_proto])
     with mapping_mod_lock:
         server = src_to_svr[(src_host, src_port, src_proto)]
@@ -259,7 +263,7 @@ def start():
 
                 do_send(reader, writer)
 
-    for server in fd_to_svr.values():
+    for server in list(fd_to_svr.values()):
         server.destroy()
 
     for fd in fd_to_pair:

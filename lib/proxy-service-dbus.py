@@ -1,4 +1,3 @@
-
 """
 The service component for the port redirector.
 
@@ -19,15 +18,14 @@ import dbus.service
 #
 # For the main loop and timeouts.
 #
-import glib
 from dbus.mainloop.glib import DBusGMainLoop
-import gtk
-import gobject
+from gi.repository import Gtk
+from gi.repository import GObject
 
 import portforward
 import socket
 
-gobject.threads_init()
+GObject.threads_init()
 
 def protocol_string_to_enum(portspec):
     return (portspec[0], portspec[1], portforward.Protocol.FromString[portspec[2]])
@@ -66,7 +64,7 @@ class PortRedirector(dbus.service.Object):
                          out_signature='a(sissis)')
     def ReadMappings(self):
         src_to_dest = []
-        for svr in portforward.src_to_svr.itervalues():
+        for svr in portforward.src_to_svr.values():
             src = svr._src
             dest = svr._dest
             src_to_dest.append(
@@ -77,6 +75,6 @@ class PortRedirector(dbus.service.Object):
 DBusGMainLoop(set_as_default=True)
 p = PortRedirector()
 try:
-    gtk.main()
+    Gtk.main()
 except KeyboardInterrupt:
     portforward.quit()

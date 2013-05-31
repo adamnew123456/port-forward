@@ -4,7 +4,7 @@ class Messages:
     """
     All messages that can be sent down the socket.
     """
-    AddProxy, DelProxy, GetProxies, Success, Failure = range(2, 7)
+    AddProxy, DelProxy, GetProxies, Success, Failure = list(range(2, 7))
 
 def read_host_port_proto(socket):
     """
@@ -12,7 +12,7 @@ def read_host_port_proto(socket):
     """
     unpacking_recv = lambda sz, fmt: struct.unpack(fmt, socket.recv(sz))[0]
     host_sz = unpacking_recv(4, "@I")
-    host = socket.recv(host_sz)
+    host = socket.recv(host_sz).decode('utf-8')
     port = unpacking_recv(4, "@I")
     proto = unpacking_recv(4, "@I")
     return (host, port, proto)
@@ -34,7 +34,7 @@ def read_message(socket):
     elif msg_type == Messages.GetProxies:
         num_proxies = struct.unpack("@I", socket.recv(4))[0]
         proxies = []
-        for x in xrange(num_proxies):
+        for x in range(num_proxies):
             src = read_host_port_proto(socket)
             dest = read_host_port_proto(socket)
             proxies.append((src, dest))
@@ -50,7 +50,7 @@ def write_host_port_proto(socket, host, port, proto):
     """ 
     packing_send = lambda val, fmt: socket.send(struct.pack(fmt, val))
     packing_send(len(host), "@I")
-    socket.send(host)
+    socket.send(bytes(host, 'utf-8'))
     packing_send(port, "@I")
     packing_send(proto, "@I")
 

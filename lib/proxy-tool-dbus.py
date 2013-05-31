@@ -22,7 +22,7 @@ def portspec(arg):
 
 try:
     if sys.argv[1] not in ('add', 'del', 'list'):
-        print __doc__
+        print(__doc__)
         sys.exit(1)
 
     if sys.argv[1] == 'add':
@@ -30,8 +30,8 @@ try:
         dest = portspec(sys.argv[3])
     elif sys.argv[1] == 'del':
         src = portspec(sys.argv[2])
-except IndexError:
-    print __doc__
+except (IndexError, ValueError):
+    print(__doc__)
     sys.exit(1)
 
 BUS = "org.new123456.Proxy"
@@ -43,12 +43,12 @@ proxy = dbus.Interface(obj, BUS)
 
 if sys.argv[1] == 'add':
     if not proxy.AddMapping(src, dest):
-        print '[Unable to map port - is it taken already?]'
+        print('[Unable to map port - is it taken already?]')
         sys.exit(1)
 elif sys.argv[1] == 'del':
     if not proxy.RemoveMapping(src):
-        print '[Unable to unmap port - does it have a proxy?]'
+        print('[Unable to unmap port - does it have a proxy?]')
         sys.exit(1)
 elif sys.argv[1] == 'list':
     for (srchost, srcport, srcproto, desthost, destport, destproto) in proxy.ReadMappings():
-        print '{}:{} ({}) -> {}:{} ({})'.format(srchost, srcport, srcproto, desthost, destport, destproto)
+        print('{}:{} ({}) -> {}:{} ({})'.format(srchost, srcport, srcproto, desthost, destport, destproto))

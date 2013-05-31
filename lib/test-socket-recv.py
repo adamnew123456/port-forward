@@ -3,7 +3,7 @@ import socketproto
 import time
 
 def assert_eq(a, b):
-    print repr(a), "==", repr(b), "..."
+    print(repr(a), "==", repr(b), "...")
     assert a == b
 
 test_socket_send = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
@@ -14,18 +14,18 @@ try:
     msg = socketproto.read_message(test_socket_send)
     assert type(msg) is bool
     assert_eq(msg, True)
-    print "[AddProxy] Success"
+    print("[AddProxy] Success")
 
     socketproto.write_message(test_socket_send, (socketproto.Messages.DelProxy, ('', 8000, socket.SOCK_DGRAM)))
     msg = socketproto.read_message(test_socket_send)
     assert type(msg) is bool
     assert_eq(msg,  False)
-    print "[DelProxy] Success"
+    print("[DelProxy] Success")
 
     socketproto.write_message(test_socket_send, (socketproto.Messages.GetProxies, []))
     msgtype, param = socketproto.read_message(test_socket_send)
     assert_eq(msgtype, socketproto.Messages.GetProxies)
     assert_eq(param, [(('', 8000, socket.SOCK_DGRAM), ('www.google.com', 80, socket.SOCK_STREAM))])
-    print "[GetProxies] Success"
+    print("[GetProxies] Success")
 finally:
     test_socket_send.close()

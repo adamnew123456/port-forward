@@ -47,7 +47,7 @@ try:
 
         elif msgtype == socketproto.Messages.GetProxies:
             src_to_dest = []
-            for svr in portforward.src_to_svr.itervalues():
+            for svr in portforward.src_to_svr.values():
                 src = svr._src
                 dest = svr._dest
                 src_to_dest.append((src, dest))

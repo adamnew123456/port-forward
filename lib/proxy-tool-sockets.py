@@ -19,15 +19,24 @@ import socketproto
 import sys
 
 def portspec(arg):
-    proto, host, port = arg.split(":")
-    return (host, int(port), {
+    try:
+        proto, host, port = arg.split(":")
+    except ValueError:
+        print(__doc__)
+        sys.exit(1)
+
+    try:
+        return (host, int(port), {
             'TCP': socket.SOCK_STREAM,
             'UDP': socket.SOCK_DGRAM,
-    }[proto])
+        }[proto])
+    except KeyError:
+        print(__doc__)
+        sys.exit(1)
 
 try:
     if sys.argv[1] not in ('add', 'del', 'list'):
-        print __doc__
+        print(__doc__)
         sys.exit(1)
 
     if sys.argv[1] == 'add':
@@ -36,7 +45,7 @@ try:
     elif sys.argv[1] == 'del':
         src = portspec(sys.argv[2])
 except IndexError:
-    print __doc__
+    print(__doc__)
     sys.exit(1)
 
 client = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
@@ -45,20 +54,21 @@ client.connect("/tmp/.proxy-socket")
 if sys.argv[1] == 'add':
     socketproto.write_message(client, (socketproto.Messages.AddProxy, (src, dest)))
     if socketproto.read_message(client) is not True:
-        print '[Unable to map port - is it taken already?]'
+        print('[Unable to map port - is it taken already?]')
         sys.exit(1)
 
 elif sys.argv[1] == 'del':
     socketproto.write_message(client, (socketproto.Messages.DelProxy, src))
     if socketproto.read_message(client) is not True:
-        print '[Unable to unmap port - does it have a proxy?]'
+        print('[Unable to unmap port - does it have a proxy?]')
         sys.exit(1)
 
 elif sys.argv[1] == 'list':
     socketproto.write_message(client, (socketproto.Messages.GetProxies, []))
     msg, proxies = socketproto.read_message(client)
     if msg != socketproto.Messages.GetProxies:
-        print '[Protocol error]'
+        print('[Protocol error]')
+        sys.exit(1)
 
     tostring = {
         socket.SOCK_STREAM: 'TCP',
@@ -66,4 +76,4 @@ elif sys.argv[1] == 'list':
     }
 
     for ((srchost, srcport, srcproto), (desthost, destport, destproto)) in proxies:
-        print '{}:{} ({}) -> {}:{} ({})'.format(srchost, srcport, tostring[srcproto], desthost, destport, tostring[destproto])
+        print('{}:{} ({}) -> {}:{} ({})'.format(srchost, srcport, tostring[srcproto], desthost, destport, tostring[destproto]))
