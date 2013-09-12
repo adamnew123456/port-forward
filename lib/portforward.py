@@ -1,7 +1,8 @@
 import logging
-import select
 import socket
 import threading
+
+import poller
 
 logger = logging.getLogger('[' + __name__ + ']')
 
@@ -49,7 +50,7 @@ class UDPServer:
         "Binds the socket and registers it"
         self._server.setblocking(0)
         self._server.bind(self._src[:Address.HOST_AND_PORT])
-        poll.register(self._server, select.EPOLLIN)
+        poll.register(self._server)
 
         src_to_svr[self._src] = self
         fd_to_svr[self._server.fileno()] = self
@@ -96,7 +97,7 @@ class UDPServer:
     
             logger.debug("UDP: Registering the bridge socket %i", self._bridge.fileno())
             fd_to_pair[self._bridge.fileno()] = (self._bridge, self._server)
-            poll.register(self._bridge, select.EPOLLIN)
+            poll.register(self._bridge)
 
         do_send(self._bridge, self._server)
 
@@ -115,7 +116,7 @@ class TCPServer:
         self._socket.setblocking(0)
         self._socket.bind(self._src[:Address.HOST_AND_PORT])
         self._socket.listen(5)
-        poll.register(self._socket, select.EPOLLIN)
+        poll.register(self._socket)
 
         src_to_svr[self._src] = self
         fd_to_svr[self._socket.fileno()] = self
@@ -155,10 +156,10 @@ class TCPServer:
         fd_to_pair[bridge.fileno()] = (bridge, inbound)
         fd_to_pair[inbound.fileno()] = (inbound, bridge)
 
-        logger.debug("TCP: Registering Inbound %i And Bridge %i With epoll",
+        logger.debug("TCP: Registering Inbound %i And Bridge %i With The Selector",
                      inbound.fileno(), bridge.fileno())
-        poll.register(bridge.fileno(), select.EPOLLIN)
-        poll.register(inbound.fileno(), select.EPOLLIN)
+        poll.register(bridge.fileno())
+        poll.register(inbound.fileno())
 
 mapping_mod_lock = threading.Lock()
 
@@ -174,7 +175,7 @@ fd_to_svr = {}
 # Useful for doing transfers of data
 fd_to_pair = {}
 
-poll = select.epoll()
+poll = poller.Poller()
 
 def do_send(reader, writer):
     """
@@ -251,7 +252,7 @@ def start():
     """
 
     while not done:
-        for fd, event in poll.poll(timeout=1):
+        for fd in poll.poll(timeout=1):
             if fd in fd_to_svr:
                 fd_to_svr[fd].connect()
             else:

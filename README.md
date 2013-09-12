@@ -3,8 +3,6 @@
 This is a port forwarder, which is designed to forward a port on localhost
 to a port somewhere else (either another port on localhost, or a remote port).
 
-(Note that it is Linux specific at the moment - I wrote it using epoll).
-
 # Why write it? #
 
 I didn't want to muck around with doing any sort of system port fowarding
