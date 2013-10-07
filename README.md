@@ -9,6 +9,14 @@ I didn't want to muck around with doing any sort of system port fowarding
 using something like iptables. I needed a quick solution, preferably in userspace,
 which turned into this set of programs.
 
+# How is it built? #
+
+There is a high level architecture present in the doc directory. Just run 
+`python server.py config.ini` to load the interface to the Wiki which holds
+the documentation (you must be using Python 3, preferably 3.3, to use this
+script). Open up 'http://localhost:8000/wiki/page/MainPage' and read from
+there.
+
 # How do I use it? #
 
 The tool comes in to parts, the server and the tool, both of which have two versions,
